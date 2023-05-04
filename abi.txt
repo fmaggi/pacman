@@ -1,0 +1,12 @@
+x0 -> framebuffer
+funciones para dibujar:
+    x1 -> color
+    x2 -> coordenada en x
+    x3 -> coordenada en y
+    x4 a x9 -> parametros especificos
+
+funciones matematicas:
+    x21 en adelante parametros 
+    x21 return value
+
+    

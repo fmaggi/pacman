@@ -1,0 +1,7 @@
+*.o
+*.img
+*.hex
+*.elf
+*.list
+*.img
+memory_map.txt
