@@ -92,40 +92,40 @@ triangle_up:
     mov x11, xzr            // x
     mov x12, xzr            // y
 
-tr_up_loop:
-    cmp x11, x9
-    b.gt tr_up_done            // while x <= base/2
-    mov x13, x12              // y0 = y
-    
-    tr_up_y_loop:
-        cmp x13, x5        // while y0 <= height
-        b.gt tr_up_y_done
+    tr_up_loop:
+        cmp x11, x9
+        b.gt tr_up_done            // while x <= base/2
+        mov x13, x12              // y0 = y
+        
+        tr_up_y_loop:
+            cmp x13, x5        // while y0 <= height
+            b.gt tr_up_y_done
 
-        add x14, x3, x13   // y_left + y0 
-        lsl x14, x14, 9    // (y_left + y0)*512
+            add x14, x3, x13   // y_left + y0 
+            lsl x14, x14, 9    // (y_left + y0)*512
 
-        add x14, x14, x2   // x_left + (y_left + y0)*512
+            add x14, x14, x2   // x_left + (y_left + y0)*512
 
-        add x15, x14, x11  // (x_left + x) + (y_left + y0)*512 
-        lsl x15, x15, 1    // 2*((x_left + x) + (y_left + y0)*512)
-        add x15, x0, x15   // &framebuffer[pixel]
-        sturh w1, [x15]
+            add x15, x14, x11  // (x_left + x) + (y_left + y0)*512 
+            lsl x15, x15, 1    // 2*((x_left + x) + (y_left + y0)*512)
+            add x15, x0, x15   // &framebuffer[pixel]
+            sturh w1, [x15]
 
-        sub x15, x14, x11
-        lsl x15, x15, 1    // 2*((x_left - x) + (y_left + y0)*512)
-        add x15, x0, x15   // &framebuffer[pixel]
-        sturh w1, [x15]
+            sub x15, x14, x11
+            lsl x15, x15, 1    // 2*((x_left - x) + (y_left + y0)*512)
+            add x15, x0, x15   // &framebuffer[pixel]
+            sturh w1, [x15]
 
-        add x13, x13, 1     // y0 += 1
-        b tr_up_y_loop
+            add x13, x13, 1     // y0 += 1
+            b tr_up_y_loop
 
-    tr_up_y_done:
-        add x11, x11, 1     // x += 1
-        add x12, x12, x10   // limit_y += dydx
-        b tr_up_loop
+        tr_up_y_done:
+            add x11, x11, 1     // x += 1
+            add x12, x12, x10   // limit_y += dydx
+            b tr_up_loop
 
-tr_up_done:
-    br x30
+    tr_up_done:
+        br x30
 
 triangle_down:
     // dydx = height / (base/2)
@@ -136,41 +136,127 @@ triangle_down:
     mov x11, xzr            // x
     mov x12, xzr            // y
 
-tr_down_loop:
-    cmp x11, x9
-    b.gt tr_down_done            // while x <= base/2
-    mov x13, x12              // y0 = y
+    tr_down_loop:
+        cmp x11, x9
+        b.gt tr_down_done            // while x <= base/2
+        mov x13, x12              // y0 = y
     
-    tr_down_y_loop:
-        cmp x13, x5        // while y0 <= height
-        b.gt tr_down_y_done
+        tr_down_y_loop:
+            cmp x13, x5        // while y0 <= height
+            b.gt tr_down_y_done
 
-        sub x14, x3, x13   // y_left - y0 
-        lsl x14, x14, 9    // (y_left - y0)*512
+            sub x14, x3, x13   // y_left - y0 
+            lsl x14, x14, 9    // (y_left - y0)*512
 
-        add x14, x14, x2   // x_left + (y_left - y0)*512
+            add x14, x14, x2   // x_left + (y_left - y0)*512
 
-        add x15, x14, x11  // (x_left + x) + (y_left - y0)*512 
-        lsl x15, x15, 1    // 2*((x_left + x) + (y_left - y0)*512)
-        add x15, x0, x15   // &framebuffer[pixel]
-        sturh w1, [x15]
+            add x15, x14, x11  // (x_left + x) + (y_left - y0)*512 
+            lsl x15, x15, 1    // 2*((x_left + x) + (y_left - y0)*512)
+            add x15, x0, x15   // &framebuffer[pixel]
+            sturh w1, [x15]
 
-        sub x15, x14, x11
-        lsl x15, x15, 1    // 2*((x_left - x) + (y_left - y0)*512)
-        add x15, x0, x15   // &framebuffer[pixel]
-        sturh w1, [x15]
+            sub x15, x14, x11
+            lsl x15, x15, 1    // 2*((x_left - x) + (y_left - y0)*512)
+            add x15, x0, x15   // &framebuffer[pixel]
+            sturh w1, [x15]
 
-        add x13, x13, 1     // y0 += 1
-        b tr_down_y_loop
+            add x13, x13, 1     // y0 += 1
+            b tr_down_y_loop
 
-    tr_down_y_done:
-        add x11, x11, 1     // x += 1
-        add x12, x12, x10   // limit_y += dydx
-        b tr_down_loop
+        tr_down_y_done:
+            add x11, x11, 1     // x += 1
+            add x12, x12, x10   // limit_y += dydx
+            b tr_down_loop
 
-tr_down_done:
-    br x30
+    tr_down_done:
+        br x30
 
+triangle_right:
+    // dydx = (base/2) / height
+    lsr x9, x4, 1         // base / 2
+    mov x10, x9
+    udiv w10, w10, w5     // base/2 / height
 
+    mov x11, xzr            // x
+    mov x12, xzr            // limitY
 
+    tr_r_loop:
+        cmp x11, x5
+        b.gt tr_r_done            // while x <= height
+        mov x13, xzr              // y = 0
+        
+        tr_r_y_loop:
+            cmp x13, x12       // while y0 <= limitY
+            b.gt tr_r_y_done
 
+            add x14, x2, x11   // x_left+x
+
+            add x15, x3, x13   // y_left+y
+            lsl x15, x15, 9    // (y_left+y)*512
+            add x15, x14, x15  // (x_left + x) + (y_left + y0)*512 
+            lsl x15, x15, 1    // 2*((x_left + x) + (y_left + y0)*512)
+            add x15, x0, x15   // &framebuffer[pixel]
+            sturh w1, [x15]
+
+            sub x15, x3, x13   // y_left-y
+            lsl x15, x15, 9    // (y_left+y)*512
+            add x15, x14, x15  // (x_left + x) + (y_left - y0)*512 
+            lsl x15, x15, 1    // 2*((x_left + x) + (y_left - y0)*512)
+            add x15, x0, x15   // &framebuffer[pixel]
+            sturh w1, [x15]
+
+            add x13, x13, 1     // y0 += 1
+            b tr_r_y_loop
+
+        tr_r_y_done:
+            add x11, x11, 1     // x += 1
+            add x12, x12, x10   // limit_y += dydx
+            b tr_r_loop
+
+    tr_r_done:
+        br x30
+
+triangle_left:
+    // dydx = (base/2) / height
+    lsr x9, x4, 1         // base / 2
+    mov x10, x9
+    udiv w10, w10, w5     // base/2 / height
+
+    mov x11, xzr            // x
+    mov x12, xzr            // limitY
+
+    tr_l_loop:
+        cmp x11, x5
+        b.gt tr_r_done            // while x <= height
+        mov x13, xzr              // y = 0
+        
+        tr_l_y_loop:
+            cmp x13, x12       // while y0 <= limitY
+            b.gt tr_l_y_done
+
+            sub x14, x2, x11   // x_left-x
+
+            add x15, x3, x13   // y_left+y
+            lsl x15, x15, 9    // (y_left+y)*512
+            add x15, x14, x15  // (x_left - x) + (y_left + y0)*512 
+            lsl x15, x15, 1    // 2*((x_left - x) + (y_left + y0)*512)
+            add x15, x0, x15   // &framebuffer[pixel]
+            sturh w1, [x15]
+
+            sub x15, x3, x13   // y_left-y
+            lsl x15, x15, 9    // (y_left+y)*512
+            add x15, x14, x15  // (x_left - x) + (y_left - y0)*512 
+            lsl x15, x15, 1    // 2*((x_left - x) + (y_left - y0)*512)
+            add x15, x0, x15   // &framebuffer[pixel]
+            sturh w1, [x15]
+
+            add x13, x13, 1     // y0 += 1
+            b tr_l_y_loop
+
+        tr_l_y_done:
+            add x11, x11, 1     // x += 1
+            add x12, x12, x10   // limit_y += dydx
+            b tr_r_loop
+
+    tr_l_done:
+        br x30
