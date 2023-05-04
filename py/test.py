@@ -158,6 +158,38 @@ def tr_right(x_left, y_left, base, height):
 
     return ps
 
+def vertical_line(x, y0, y1):
+    ps = []
+    if y0 > y1:
+        y0, y1 = y1, y0
+
+    while y0 < y1:
+        ps.append((x, y0))
+        y0 += 1
+
+    return ps
+
+def line(x0, x1):
+    ps = []
+
+    if x0[0] == x1[0]:
+        return vertical_line(x0[0], x0[1], x1[1])
+
+    if x0[0] > x1[0]:
+        x0, x1 = x1, x0
+
+    dydx = (x1[1] - x0[1]) // (x1[0] - x0[0])
+
+    x = x0[0]
+    y = x0[1]
+
+    while x < x1[0]:
+        ps.append((x, y))
+        x += 1
+        y += dydx
+
+    return ps
+
 
 # import time
 #
@@ -181,14 +213,10 @@ def tr_right(x_left, y_left, base, height):
 # print(f'2 -> {average(t2)}, {l2}')
 # print(f'{average(t2)/average(t1)}')
 
-ps = tr_down(50, 75, 100, 50)
-ps2 = tr_up(50, 75, 100, 50)
-ps3 = tr_left(50, 75, 100, 50)
-ps4 = tr_right(50, 75, 100, 50)
+ps = line((0, 0), (0, 100))
+ps2 = line((0, 0), (100, 0))
 figure, axes = plt.subplots(1)
-# axes.scatter([p[0] for p in ps], [p[1] for p in ps])
-# axes.scatter([p[0] for p in ps2], [p[1] for p in ps2])
-# axes.scatter([p[0] for p in ps3], [p[1] for p in ps3])
-axes.scatter([p[0] for p in ps4], [p[1] for p in ps4])
+axes.scatter([p[0] for p in ps], [p[1] for p in ps])
+axes.scatter([p[0] for p in ps2], [p[1] for p in ps2])
 axes.set_aspect(1)
 plt.show()

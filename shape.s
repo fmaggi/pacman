@@ -16,6 +16,15 @@
 .global triangle_left
 .global triangle_right
 
+// Parms
+// x1 -> color
+// x2 -> x0
+// x3 -> y0
+// x4 -> x1
+// x5 -> y1
+// x6 -> thickness?
+.global line
+
 circle: 
     // we call sqrt here so we need to store the origin address somewhere
     mov x29, x30
@@ -260,3 +269,70 @@ triangle_left:
 
     tr_l_done:
         br x30
+
+line:
+    cmp x2, x4
+    b.eq vertical_line
+
+    // if x0 > x1 switch the points around
+    cmp x2, x4 
+    b.lt draw_line
+    mov x9, x2
+    mov x2, x4
+    mov x4, x9
+
+    mov x9, x3
+    mov x3, x5
+    mov x5, x9
+
+    draw_line:
+        // dydx = (y1-y0) / (x1-x0)
+        sub x9, x5, x3
+        sub x10, x4, x2
+        sdiv w9, w9, w10
+
+        mov x11, x2  // x = x0
+        mov x12, x3  // y = y0
+
+        l_loop:
+            cmp x11, x4
+            b.gt l_done // while x < x1
+
+            lsl x13, x12, 9    // (y*512)
+            add x13, x13, x11  // x+y*512
+            lsl x13, x13, 1    // 2*(x+y*512)
+            add x13, x13, x0   // &framebuffer[pixel]
+            sturh w1, [x13]
+
+            add x11, x11, 1   // x += 1
+            add x12, x12 ,x9  // y += dydx
+
+            b l_loop
+
+    l_done:
+        br x30
+
+vertical_line:
+    cmp x3, x5
+    b.lt draw_v_line
+    mov x9, x3
+    mov x3, x5
+    mov x5, x9
+
+    draw_v_line:
+        cmp x3, x5
+        b.gt l_done
+
+        lsl x13, x3, 9    // (y*512)
+        add x13, x13, x1  // x+y*512
+        lsl x13, x13, 1    // 2*(x+y*512)
+        add x13, x13, x0   // &framebuffer[pixel]
+        sturh w1, [x13]
+
+        add x3, x3, 1 // y += dydx
+
+        b draw_v_line
+
+        
+        
+
