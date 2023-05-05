@@ -127,7 +127,7 @@ def tr_left(x_left, y_left, base, height):
     
     x = 0
     limitY = 0
-    dydx = base//2 / height
+    dydx = base//2 // height
 
     while x < height:
         y = 0
@@ -145,7 +145,8 @@ def tr_right(x_left, y_left, base, height):
     
     x = 0
     limitY = 0
-    dydx = base//2 / height
+    dydx = base//2 // height
+    print(dydx)
 
     while x < height:
         y = 0
@@ -213,10 +214,8 @@ def line(x0, x1):
 # print(f'2 -> {average(t2)}, {l2}')
 # print(f'{average(t2)/average(t1)}')
 
-ps = line((0, 0), (0, 100))
-ps2 = line((0, 0), (100, 0))
+ps2 = tr_right(256, 256, 30, 20)
 figure, axes = plt.subplots(1)
-axes.scatter([p[0] for p in ps], [p[1] for p in ps])
 axes.scatter([p[0] for p in ps2], [p[1] for p in ps2])
 axes.set_aspect(1)
 plt.show()
