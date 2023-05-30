@@ -27,8 +27,7 @@
 
 circle: 
     // we call sqrt here so we need to store the origin address somewhere
-    sub x27, x27, 8
-    stur x30, [x27]
+    mov x29, x30
     // x9 -> x 
     // x10 -> y
     mul x12, x4, x4 // r^2
@@ -90,11 +89,7 @@ circle:
         mov x10, x21        // y = sqrt(r^2 - x^2)
         b loopX
     exit:
-
-        ldur x30, [x27]
-        add x27, x27, 8
-        
-        br x30
+        br x29
     
 triangle_up:
     // dydx = height / (base/2)

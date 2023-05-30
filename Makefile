@@ -18,7 +18,7 @@ clean :
 	rm -f memory_map.txt
 
 main.o : main.s
-	$(ARMGNU)-as $(AOPS) main.s gpio.s app.s shape.s math.s pacman.s -o main.o
+	$(ARMGNU)-as $(AOPS) main.s gpio.s app.s shape.s map.s math.s pacman.s -o main.o
 
 
 kernel.img : memmap main.o

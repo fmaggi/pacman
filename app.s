@@ -13,26 +13,27 @@ app:
 	//---------------- Main code --------------------
 	// X0 contiene la dirección base del framebuffer (NO MODIFICAR)
 inicio:
-    // mov x29, TICK
+    // mov x26, TICK
+    bl map
     mov x28, 0
     mov x2, 256
     mov x3, 256
 
 loop:
 
-    // sub x29,x29, 1
+    // sub x26,x26, 1
     
     bl clear_pacman
     bl update_pacman
     bl draw_pacman
 
-	mov x11, 0x50000
+	mov x11, 0x100000
 delay1: 
 	sub x11,x11, 1
 	cbnz x11, delay1
 
-    // cbnz x29, loop
-    // mov x29, TICK
+    // cbnz x26, loop
+    // mov x26, TICK
     b loop
 
 
