@@ -323,7 +323,7 @@ vertical_line:
         b.gt l_done
 
         lsl x13, x3, 9    // (y*512)
-        add x13, x13, x1  // x+y*512
+        add x13, x13, x2  // x+y*512
         lsl x13, x13, 1    // 2*(x+y*512)
         add x13, x13, x0   // &framebuffer[pixel]
         sturh w1, [x13]

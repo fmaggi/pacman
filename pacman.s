@@ -4,8 +4,10 @@
 
 .equ RADIO,  20
 .equ YELLOW, 0xf7e7
-.equ SPEED,  5
 .equ BLUE,   0xff
+.equ RED, 0xf000
+.equ SPEED,  5
+.equ COLLIDER, 10
 
 clear_pacman:
     mov x25, x30
@@ -15,7 +17,6 @@ clear_pacman:
     bl circle
 
     br x25
-
 
 draw_pacman:
     mov x25, x30
@@ -40,31 +41,27 @@ update_pacman:
     check_down:
         cmp x22, 0x20000
         b.ne check_right
-        add x3, x3, SPEED 
         bl check_collision_down
-        b.ne check_right
-        sub x3, x3, SPEED
+        b.eq check_right
+        add x3, x3, SPEED
     check_right:
         cmp x22, 0x40000
         b.ne check_left
-        add x2, x2, SPEED
         bl check_collision_right
-        b.ne check_left
-        sub x2, x2, SPEED
+        b.eq check_left
+        add x2, x2, SPEED
     check_left:
         cmp x22, 0x2000
         b.ne check_up
-        sub x2, x2, SPEED
         bl check_collision_left
-        b.ne check_up
-        add x2, x2, SPEED
+        b.eq check_up
+        sub x2, x2, SPEED
     check_up:
         cmp x22, 0x4000
         b.ne toggle
-        sub x3, x3, SPEED
         bl check_collision_up
-        b.ne toggle
-        add x3, x3, SPEED
+        b.eq toggle
+        sub x3, x3, SPEED
 
 
     toggle:
@@ -76,13 +73,17 @@ update_pacman:
 
 // sets flags zero flag if collision happened
 check_collision_right:
-    add x9, x2, RADIO
-    add x9, x9, 1 // limite derecho + 1
+    mov x21, RED
+    add x9, x2, RADIO    // limite Derecho
+    add x8, x9, COLLIDER // limite derecho + COLLIDER 
+c_right_outer_loop:
     sub x10, x3, RADIO // limite inferior
     add x11, x3, RADIO // limite superior
+    cmp x9, x8
+    b.ge c_not_collision
 c_right_loop:
     cmp x10, x11
-    b.ge c_not_collision
+    b.ge c_right_loop_done
     lsl x12, x10, 9   // y*512
     add x12, x12, x9  // x + y*512
     lsl x12, x12, 1   // 2(x + y*512)
@@ -92,15 +93,22 @@ c_right_loop:
     b.eq c_exit      // collision, exit early
     add x10, x10, 1
     b c_right_loop
-
+c_right_loop_done:
+    add x9, x9, 1
+    b c_right_outer_loop
+    
 check_collision_left:
+    mov x21, RED
     sub x9, x2, RADIO
-    sub x9, x9, 1 // limite izquierod - 1
+    sub x8, x9, COLLIDER // limite izquierod - 1
+c_left_outer_loop:
     sub x10, x3, RADIO // limite inferior
     add x11, x3, RADIO // limite superior
+    cmp x9, x8
+    b.le c_not_collision
 c_left_loop:
     cmp x10, x11
-    b.ge c_not_collision
+    b.ge c_left_loop_done
     lsl x12, x10, 9   // y*512
     add x12, x12, x9  // x + y*512
     lsl x12, x12, 1   // 2(x + y*512)
@@ -110,15 +118,22 @@ c_left_loop:
     b.eq c_exit
     add x10, x10, 1
     b c_left_loop
+c_left_loop_done:
+    sub x9, x9, 1
+    b c_left_outer_loop
 
 check_collision_up:
+    mov x21, RED
     sub x9, x3, RADIO
-    sub x9, x9, 1 // limite superior - 1
+    sub x8, x9, COLLIDER // limite superior - 1
+c_up_outer_loop:
     sub x10, x2, RADIO // limite izquierod
     add x11, x2, RADIO // limite derecho
+    cmp x9, x8
+    b.le c_not_collision
 c_up_loop:
     cmp x10, x11
-    b.ge c_not_collision
+    b.ge c_up_loop_done
     lsl x12, x9, 9   // y*512
     add x12, x12, x10  // x + y*512
     lsl x12, x12, 1   // 2(x + y*512)
@@ -127,15 +142,23 @@ c_up_loop:
     cmp x13, BLUE
     b.eq c_exit
     add x10, x10, 1
+    b c_up_loop
+c_up_loop_done:
+    sub x9, x9, 1
+    b c_up_outer_loop
 
 check_collision_down:
+    mov x21, RED
     add x9, x3, RADIO
-    add x9, x9, 1 // limite inferior + 1
+    add x8, x9, COLLIDER // limite inferior + 1
+c_down_outer_loop:
     sub x10, x2, RADIO // limite izquierod
     add x11, x2, RADIO // limite derecho
+    cmp x9, x8
+    b.ge c_not_collision
 c_down_loop:
     cmp x10, x11
-    b.ge c_not_collision
+    b.ge c_down_loop_done
     lsl x12, x9, 9   // y*512
     add x12, x12, x10  // x + y*512
     lsl x12, x12, 1   // 2(x + y*512)
@@ -144,6 +167,10 @@ c_down_loop:
     cmp w13, BLUE
     b.eq c_exit
     add x10, x10, 1
+    b c_down_loop
+c_down_loop_done:
+    add x9, x9, 1
+    b c_down_outer_loop
 
 c_not_collision:
     // f*cking assembler cant use xzr instead of x27 :(
