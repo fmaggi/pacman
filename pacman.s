@@ -8,6 +8,8 @@
 .equ RED, 0xf000
 .equ SPEED,  5
 .equ COLLIDER, 10
+.equ TIMER, 16
+.equ GREEN_TIMER, 0x400000
 
 clear_pacman:
     mov x25, x30
@@ -68,6 +70,14 @@ update_pacman:
         // cbnz x29, update_done
         eor x28, x28, 1 // toggle whether or not to draw the mouth
 
+    ldur x14, [xzr, GREEN_TIMER]
+    sub x14, x14, 1
+    stur x14, [xzr, GREEN_TIMER]
+    cmp x14, 0
+    b.ne update_done
+
+    // ACA APAGAR EL LED
+
     update_done:
         br x25
 
@@ -91,6 +101,15 @@ c_right_loop:
     ldurh w13, [x12]   
     cmp w13, BLUE
     b.eq c_exit      // collision, exit early
+
+    cmp w13, 0x07c0
+    b.ne skip
+   
+    // ACA PRENDER EL LED
+    mov x14, TIMER
+    stur x14, [xzr, GREEN_TIMER]
+    
+skip:
     add x10, x10, 1
     b c_right_loop
 c_right_loop_done:
