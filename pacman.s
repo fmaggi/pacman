@@ -70,9 +70,10 @@ update_pacman:
         // cbnz x29, update_done
         eor x28, x28, 1 // toggle whether or not to draw the mouth
 
-    ldur x14, [xzr, GREEN_TIMER]
+    mov x15, GREEN_TIMER
+    ldur x14, [x15]
     sub x14, x14, 1
-    stur x14, [xzr, GREEN_TIMER]
+    stur x14, [x15]
     cmp x14, 0
     b.ne update_done
 
@@ -106,8 +107,9 @@ c_right_loop:
     b.ne skip
    
     // ACA PRENDER EL LED
+    mov x15, GREEN_TIMER
     mov x14, TIMER
-    stur x14, [xzr, GREEN_TIMER]
+    stur x14, [x15]
     
 skip:
     add x10, x10, 1
